@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final WebClient webClient;
+    private final WebClient.Builder webClient;
 
     public void placeOrder(OrderReq orderReq) {
         Order order = Order.builder()
@@ -30,8 +30,8 @@ public class OrderService {
                 .build();
         List<String> skuCodes = order.getOrderLineItems().stream().map(OrderLineItem::getSkuCode).collect(Collectors.toList());
         // Check inventory service if item in stock
-        InventoryRes[] inventoryResArray = webClient.get()
-                .uri("http://localhost:8082/api/inventory/isInStock", uriBuilder -> uriBuilder.queryParam("skuCodes", skuCodes).build())
+        InventoryRes[] inventoryResArray = webClient.build().get()
+                .uri("http://inventory-service/api/inventory/isInStock", uriBuilder -> uriBuilder.queryParam("skuCodes", skuCodes).build())
                         .retrieve()
                                 .bodyToMono(InventoryRes[].class)
                                         .block();
